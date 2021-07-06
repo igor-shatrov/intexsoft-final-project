@@ -38,6 +38,8 @@ services:
       ports: 
         - 8082:80
         - 10051:10051
+      volumes: 
+        - zabbix_data:/var/lib/mysql
 
 
 
@@ -48,4 +50,5 @@ volumes:
     gitlab_logs:
     gitlab_data:
     jenkins_data:
+    zabbix_data:
 
