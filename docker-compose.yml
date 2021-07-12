@@ -57,6 +57,7 @@ services:
         - 10051:10051
       volumes: 
         - zabbix_data:/var/lib/mysql
+        - zabbix_alert_script:/usr/lib//usr/lib/zabbix/alertscripts
 
     registry:
       image: registry:2
@@ -84,4 +85,5 @@ volumes:
     docker_repo:
     docker_data:
     docker_certs:
+    zabbix_alert_script:
 
