@@ -60,7 +60,6 @@ services:
 
     registry:
       image: registry:2
-      restart: always
       container_name: registry
       environment: 
         REGISTRY_HTTP_TLS_CERTIFICATE: /certs/public.pem
