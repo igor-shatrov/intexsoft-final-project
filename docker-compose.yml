@@ -36,6 +36,7 @@ services:
         - jenkins_data:/var/jenkins_home
         - docker_certs:/certs/client:ro
         - .gitconfig:/root/.gitconfig
+        - /etc/docker/daemon.json:/etc/docker/daemon.json
       networks: 
         - final-project
       depends_on:
