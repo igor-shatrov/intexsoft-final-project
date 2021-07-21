@@ -4,16 +4,16 @@ services:
     gitlab:
       image: 'gitlab/gitlab-ee:latest'
       hostname: 'gitlab'
-      container_name: gitlab
+      container_name: ${GITLAB_CONTAINER_NAME}
       environment:
         GITLAB_OMNIBUS_CONFIG: |
           external_url 'https://192.168.221.1'
           gitlab_rails['gitlab_shell_ssh_port'] = 422
           # Add any other gitlab.rb configuration here, each on its own line
       ports:
-        - '8083:80'
-        - '8443:443'
-        - '422:22'
+        - "${GITLAB_HTTP_PORT}:80"
+        - "${GITLAB_HTTPS_PORT}:443"
+        - "${GITLAB_SSH_PORT}:22"
       volumes:
         - 'gitlab_config:/etc/gitlab'
         - 'gitlab_logs:/var/log/gitlab'
@@ -23,20 +23,19 @@ services:
 
     jenkins:
       image: jenkinsci/blueocean
+      container_name: ${JENKINS_CONTAINER_NAME}
       ports:
-        - '8081:8080'
-        - '50000:50000'
-      container_name: jenkins
-      user: root
+        - "${JENKINS_HTTP_PORT}:8080"
+        - "${JENKINS_SERVICE_PORT}:50000"
+      user: ${JENKINS_USER}
       environment:
-        DOCKER_HOST: tcp://docker:2376
-        DOCKER_CERT_PATH: /certs/client
-        DOCKER_TLS_VERIFY: 1
+        DOCKER_HOST: ${JENKINS_DOCKER_HOST}
+        DOCKER_CERT_PATH: ${JENKINS_DOCKER_CERT_PATH}
+        DOCKER_TLS_VERIFY: ${JENKINS_DOCKER_TLS_VERIFY}
       volumes:
         - jenkins_data:/var/jenkins_home
         - docker_certs:/certs/client:ro
         - .gitconfig:/root/.gitconfig
-        - /etc/docker/daemon.json:/etc/docker/daemon.json
       networks: 
         - final-project
       depends_on:
@@ -45,23 +44,22 @@ services:
     docker:
       image: docker:dind
       privileged: true
-      container_name: docker
+      container_name: ${DOCKER_CONTAINER_NAME}
       environment:
-        DOCKER_TLS_CERTDIR: /certs
+        DOCKER_TLS_CERTDIR: ${DOCKER_TLS_CERTDIR}
       volumes:
         - jenkins_data:/var/jenkins_home
         - docker_certs:/certs/client
         - docker_data:/var/lib/docker
-        - /etc/docker/daemon.json:/etc/docker/daemon.json
       networks: 
         - final-project
 
     zabbix:
       image: zabbix/zabbix-appliance:latest
-      container_name: zabbix
+      container_name: ${ZABBIX_CONTAINER_NAME}
       ports: 
-        - '8082:80'
-        - '10051:10051'
+        - "${ZABBIX_HTTP_PORT}:80"
+        - "${ZABBIX_SERVICE_PORT}:10051"
       volumes: 
         - zabbix_data:/var/lib/mysql
         - zabbix_alert_script:/usr/lib/zabbix/alertscripts/
@@ -70,25 +68,24 @@ services:
 
     registry:
       image: registry:2
-      container_name: registry
+      container_name: ${REGISTRY_CONTAINER_NAME}
       ports: 
-        - '5000:5000'
+        - "${REGISTRY_SERVICE_PORT}:5000"
       volumes: 
-        - /etc/ssl/docrepo:/certs
         - docker_repo:/var/lib/registry
       networks: 
         - final-project
 
     registry-ui:
       image: parabuzzle/craneoperator:latest
-      container_name: registry-ui
+      container_name: ${REGISTRY_UI_CONTAINER_NAME}
       ports:
-        - "8086:80"
+        - "${REGISTRY_UI_HTTP_PORT}:80"
       environment:
-        - REGISTRY_HOST=registry
-        - REGISTRY_PORT=5000
-        - REGISTRY_PROTOCOL=http
-        - SSL_VERIFY=false
+        - REGISTRY_HOST=${REGISTRY_HOST}
+        - REGISTRY_PORT=${REGISTRY_SERVICE_PORT}
+        - REGISTRY_PROTOCOL=${REGISTRY_PROTOCOL}
+        - SSL_VERIFY=${SSL_VERIFY}
       networks: 
         - final-project
       
